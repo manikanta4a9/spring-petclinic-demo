@@ -9,10 +9,6 @@ pipeline {
         ARTIFACTORY_PASS = credentials('artifactory-pass')
     }
 
-    tools {
-        jdk 'jdk17'
-    }
-
     stages {
 
         stage('Checkout') {
