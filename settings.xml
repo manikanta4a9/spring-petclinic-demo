@@ -1,0 +1,17 @@
+<settings>
+  <mirrors>
+    <mirror>
+      <id>jcenter</id>
+      <mirrorOf>*</mirrorOf>
+      <url>https://jcenter.bintray.com/</url>
+    </mirror>
+  </mirrors>
+
+  <servers>
+    <server>
+      <id>artifactory</id>
+      <username>${env.ARTIFACTORY_USER}</username>
+      <password>${env.ARTIFACTORY_PASS}</password>
+    </server>
+  </servers>
+</settings>
