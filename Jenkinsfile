@@ -1,56 +1,31 @@
-pipeline {
-    agent any
+node {
 
-    environment {
-        IMAGE_NAME = "spring-petclinic"
-        IMAGE_TAG = "latest"
+    stage('Checkout') {
+        checkout scm
     }
 
-    stages {
+    stage('Compile') {
+        sh './mvnw clean compile -s settings.xml'
+    }
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/spring-projects/spring-petclinic.git'
-            }
-        }
+    stage('Test') {
+        sh './mvnw test -s settings.xml'
+        junit '**/target/surefire-reports/*.xml'
+    }
 
-        stage('Compile') {
-            steps {
-                sh './mvnw clean compile -s settings.xml'
-            }
-        }
+    stage('Package') {
+        sh './mvnw package -DskipTests -s settings.xml'
+    }
 
-        stage('Test') {
-            steps {
-                sh './mvnw test -s settings.xml'
-                junit '**/target/surefire-reports/*.xml'
-            }
-        }
+    stage('Build Docker Image') {
+        sh 'docker build -t spring-petclinic:latest .'
+    }
 
-        stage('Package') {
-            steps {
-                sh './mvnw package -DskipTests -s settings.xml'
-            }
-        }
+    stage('Save Docker Image') {
+        sh 'docker save -o spring-petclinic.tar spring-petclinic:latest'
+    }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
-            }
-        }
-
-        stage('Save Docker Image (TAR)') {
-            steps {
-                sh '''
-                docker save -o $IMAGE_NAME.tar $IMAGE_NAME:$IMAGE_TAG
-                '''
-            }
-        }
-
-        stage('Archive Image') {
-            steps {
-                archiveArtifacts artifacts: '*.tar', fingerprint: true
-            }
-        }
+    stage('Archive') {
+        archiveArtifacts artifacts: '*.tar', fingerprint: true
     }
 }
