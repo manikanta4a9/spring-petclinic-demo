@@ -1,42 +1,82 @@
-# Spring PetClinic - Jenkins Pipeline Demo
+# Spring PetClinic - Jenkins CI Pipeline
 
-## Overview
-This project demonstrates a Jenkins CI pipeline using Spring PetClinic.
+## Technologies Used
+
+* Java 17
+* Maven (Maven Wrapper - `mvnw`)
+* Docker
+* Jenkins
+
 
 ## Pipeline Stages
-1. Compile the code using Maven
-2. Run unit tests
-3. Package the application
-4. Build a Docker image
-5. Push Docker image to DockerHub
-6. (Bonus) Publish artifacts to JFrog Artifactory
 
-## Dependency Management
-Dependencies are resolved using JCenter (via Maven settings.xml)
+The Jenkins pipeline performs the following steps:
 
-## Prerequisites
-- Docker
-- Jenkins
-- Java 17
+1. **Checkout**
+   Retrieves source code from the Git repository.
 
-## Run Locally
+2. **Compile**
+   Compiles the application using Maven.
 
-### Build JAR
-./mvnw clean package
+3. **Test**
+   Executes unit tests and generates reports.
 
-### Build Docker Image
+4. **Package**
+   Builds a runnable JAR file.
+
+5. **Docker Build**
+   Creates a Docker image from the application.
+
+
+## Project Structure
+
+```
+spring-petclinic-demo/
+    src/                 # Application source code
+    pom.xml              # Maven configuration
+    mvnw                 # Maven wrapper
+    mvnw.cmd
+    .mvn/
+    Dockerfile           # Docker image build 
+    Jenkinsfile          # Jenkins 
+    settings.xml         # Maven repository 
+    README.md
+```
+
+## Build and Run Locally
+
+### Step 1: Build Docker Image
+
+```bash
 docker build -t spring-petclinic .
+```
 
-### Run Container
+### Step 2: Run Container
+
+```bash
 docker run -d -p 8080:8080 spring-petclinic
+```
 
-Access:
+### Access Application
+
+Open in browser:
+
+```
 http://localhost:8080
+```
 
 ## Jenkins Setup
-- Add DockerHub credentials
-- Add Artifactory credentials
-- Run pipeline job
 
-## Docker Image
-your-dockerhub/spring-petclinic:latest
+1. Create a **Pipeline Job** in Jenkins
+2. Select **Pipeline script from SCM**
+3. Configure Git repository:
+
+   ```
+   https://github.com/<your-repo>.git
+   ```
+4. Set branch:
+
+   ```
+   */main
+   ```
+5. Save and run the pipeline
