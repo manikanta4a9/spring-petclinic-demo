@@ -1,30 +1,59 @@
-node {
+name: Java CI with Semgrep
 
-    stage('Checkout') {
-        echo "Cloning repository..."
-        checkout scm
-    }
+on:
+  push:
+    branches: ["main"]
+  pull_request:
 
-    stage('Compile') {
-        echo "Compiling application..."
-        sh './mvnw clean compile -s settings.xml'
-    }
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    stage('Test') {
-        echo "Running unit tests..."
-        sh './mvnw test -s settings.xml'
+    steps:
+      # Checkout (Jenkins: Checkout)
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        echo "Publishing test reports..."
-        junit '**/target/surefire-reports/*.xml'
-    }
+      # Setup Java (Required for Maven)
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
 
-    stage('Package') {
-        echo "Packaging application..."
-        sh './mvnw package -DskipTests -s settings.xml'
-    }
+      # Compile (Jenkins: Compile)
+      - name: Compile application
+        run: ./mvnw clean compile -s settings.xml
 
-    stage('Docker Build') {
-        echo "Building Docker image..."
-        sh 'docker build -t spring-petclinic:latest .'
-    }
-}
+      # Test (Jenkins: Test)
+      - name: Run unit tests
+        run: ./mvnw test -s settings.xml
+
+      # Publish test reports (replacement for junit step)
+      - name: Publish test results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Maven Tests
+          path: '**/target/surefire-reports/*.xml'
+          reporter: java-junit
+
+      # Semgrep Security Scan (NEW)
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >
+            p/security-audit
+            p/owasp-top-ten
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+          SEMGREP_FAIL_ON: ERROR
+
+      # Package (Jenkins: Package)
+      - name: Package application
+        run: ./mvnw package -DskipTests -s settings.xml
+
+      # Docker Build (Jenkins: Docker Build)
+      - name: Build Docker image
+        run: docker build -t spring-petclinic:latest .
