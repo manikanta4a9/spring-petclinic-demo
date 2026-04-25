@@ -12,12 +12,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run Semgrep (SAST)
+      - name: Run Semgrep (SAST - Cloud)
         uses: returntocorp/semgrep-action@v1
-        with:
-          config: "p/ci"   # standard recommended rules
         env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }} 
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
       - name: Set up Java
         uses: actions/setup-java@v4
