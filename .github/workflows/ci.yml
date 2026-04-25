@@ -1,0 +1,40 @@
+name: CI Pipeline with Semgrep
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout (Jenkins: Checkout)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Setup runtime (example Node — adjust if Python/Java/etc)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # Install dependencies (Jenkins: Build)
+      - name: Install dependencies
+        run: npm install
+
+      # Run tests (Jenkins: Test)
+      - name: Run tests
+        run: npm test
+
+      # Semgrep Security Scan (NEW)
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >
+            p/security-audit
+            p/owasp-top-ten
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+          SEMGREP_FAIL_ON: ERROR
