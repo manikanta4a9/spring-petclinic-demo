@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout (Jenkins: Checkout)
+      # Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Setup Java (Required for Maven)
+      # Setup Java
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -22,15 +22,15 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      # Compile (Jenkins: Compile)
+      # Compile
       - name: Compile application
         run: ./mvnw clean compile -s settings.xml
 
-      # Test (Jenkins: Test)
+      # Test
       - name: Run unit tests
         run: ./mvnw test -s settings.xml
 
-      # Publish test reports (replacement for junit step)
+      # Publish test reports
       - name: Publish test results
         if: always()
         uses: dorny/test-reporter@v1
@@ -39,7 +39,7 @@ jobs:
           path: '**/target/surefire-reports/*.xml'
           reporter: java-junit
 
-      # Semgrep Security Scan (NEW)
+      # Semgrep Security Scan
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
         with:
@@ -50,10 +50,10 @@ jobs:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
           SEMGREP_FAIL_ON: ERROR
 
-      # Package (Jenkins: Package)
+      # Package
       - name: Package application
         run: ./mvnw package -DskipTests -s settings.xml
 
-      # Docker Build (Jenkins: Docker Build)
+      # Docker Build
       - name: Build Docker image
         run: docker build -t spring-petclinic:latest .
